@@ -2,6 +2,10 @@
   "widgets": [
     {
       "type": "metric",
+      "x": 0,
+      "y": 0,
+      "width": 12,
+      "height": 6,
       "properties": {
         "metrics": [
           [
@@ -15,12 +19,289 @@
             "WLMQueueLength",
             "ClusterIdentifier",
             "bank-deposits-mart-final-ra3"
+          ],
+          [
+            "AWS/Redshift",
+            "CPUUtilization",
+            "ClusterIdentifier",
+            "bank-deposits-mart-final-ra3"
           ]
         ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "title": "Redshift Performance Metrics",
         "period": 300,
         "stat": "Average",
+        "yAxis": {
+          "left": {
+            "min": 0
+          }
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 0,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [
+            "AWS/Redshift",
+            "DatabaseConnections",
+            "ClusterIdentifier",
+            "bank-deposits-mart-final-ra3"
+          ],
+          [
+            "AWS/Redshift",
+            "NetworkReceiveThroughput",
+            "ClusterIdentifier",
+            "bank-deposits-mart-final-ra3"
+          ],
+          [
+            "AWS/Redshift",
+            "NetworkTransmitThroughput",
+            "ClusterIdentifier",
+            "bank-deposits-mart-final-ra3"
+          ]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
         "region": "us-east-1",
-        "title": "Redshift Health"
+        "title": "Redshift Network & Connections",
+        "period": 300,
+        "stat": "Average"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 6,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [
+            "bank-deposits-mart-final/SLA",
+            "DataArrivalDelay",
+            "Dataset",
+            "sqlserver/transactions"
+          ],
+          [
+            "bank-deposits-mart-final/SLA",
+            "ProcessingDuration",
+            "JobName",
+            "J_ORCH_Load_Deposits"
+          ],
+          [
+            "bank-deposits-mart-final/SLA",
+            "DataFreshnessAge",
+            "Schema",
+            "mart"
+          ]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "title": "SLA Metrics",
+        "period": 300,
+        "stat": "Maximum",
+        "annotations": {
+          "horizontal": [
+            {
+              "label": "Data Arrival SLA (30 min)",
+              "value": 30
+            },
+            {
+              "label": "Processing SLA (60 min)",
+              "value": 60
+            },
+            {
+              "label": "Freshness SLA (120 min)", 
+              "value": 120
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 8,
+      "y": 6,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [
+            "AWS/Lambda",
+            "Duration",
+            "FunctionName",
+            "bank-deposits-mart-final-matillion-trigger"
+          ],
+          [
+            "AWS/Lambda",
+            "Errors",
+            "FunctionName",
+            "bank-deposits-mart-final-matillion-trigger"
+          ],
+          [
+            "AWS/Lambda",
+            "Invocations",
+            "FunctionName",
+            "bank-deposits-mart-final-matillion-trigger"
+          ]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "title": "Lambda Trigger Metrics",
+        "period": 300,
+        "stat": "Sum"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 16,
+      "y": 6,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "metrics": [
+          [
+            "AWS/SQS",
+            "ApproximateNumberOfVisibleMessages",
+            "QueueName",
+            "bank-deposits-mart-final-lambda-dlq"
+          ],
+          [
+            "AWS/SQS",
+            "ApproximateNumberOfVisibleMessages", 
+            "QueueName",
+            "bank-deposits-mart-final-matillion-failure-dlq"
+          ]
+        ],
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "title": "Dead Letter Queue Metrics",
+        "period": 300,
+        "stat": "Average",
+        "annotations": {
+          "horizontal": [
+            {
+              "label": "Alert Threshold",
+              "value": 1,
+              "color": "#d62728"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "log",
+      "x": 0,
+      "y": 12,
+      "width": 24,
+      "height": 6,
+      "properties": {
+        "query": "SOURCE '/aws/lambda/bank-deposits-mart-final-matillion-trigger'\n| SOURCE '/aws/lambda/bank-deposits-mart-final-retry-handler'\n| SOURCE '/aws/lambda/bank-deposits-mart-final-sla-monitor'\n| fields @timestamp, @message\n| filter @message like /ERROR/ or @message like /FAILED/ or @message like /VIOLATION/\n| sort @timestamp desc\n| limit 100",
+        "region": "us-east-1",
+        "title": "Recent Pipeline Errors & Violations",
+        "view": "table"
+      }
+    },
+    {
+      "type": "number",
+      "x": 0,
+      "y": 18,
+      "width": 6,
+      "height": 3,
+      "properties": {
+        "metrics": [
+          [
+            "bank-deposits-mart-final/ETL",
+            "TotalRowsProcessed",
+            {
+              "stat": "Sum"
+            }
+          ]
+        ],
+        "view": "singleValue",
+        "region": "us-east-1",
+        "title": "Today's Rows Processed",
+        "period": 86400
+      }
+    },
+    {
+      "type": "number",
+      "x": 6,
+      "y": 18,
+      "width": 6,
+      "height": 3,
+      "properties": {
+        "metrics": [
+          [
+            "bank-deposits-mart-final/SLA",
+            "SLAViolationCount",
+            {
+              "stat": "Sum"
+            }
+          ]
+        ],
+        "view": "singleValue",
+        "region": "us-east-1",
+        "title": "Today's SLA Violations",
+        "period": 86400
+      }
+    },
+    {
+      "type": "number",
+      "x": 12,
+      "y": 18,
+      "width": 6,
+      "height": 3,
+      "properties": {
+        "metrics": [
+          [
+            "AWS/Lambda",
+            "Errors",
+            "FunctionName",
+            "bank-deposits-mart-final-matillion-trigger",
+            {
+              "stat": "Sum"
+            }
+          ]
+        ],
+        "view": "singleValue",
+        "region": "us-east-1",
+        "title": "Lambda Errors (24h)",
+        "period": 86400
+      }
+    },
+    {
+      "type": "number",
+      "x": 18,
+      "y": 18,
+      "width": 6,
+      "height": 3,
+      "properties": {
+        "metrics": [
+          [
+            "AWS/Redshift",
+            "QueryDuration",
+            "ClusterIdentifier",
+            "bank-deposits-mart-final-ra3",
+            {
+              "stat": "Average"
+            }
+          ]
+        ],
+        "view": "singleValue",
+        "region": "us-east-1",
+        "title": "Avg Query Duration (min)",
+        "period": 3600
       }
     }
   ]

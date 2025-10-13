@@ -1,8 +1,146 @@
 {
   "name": "J_TR_Load_Fact_Transactions",
-  "type": "transformation",
+  "type": "transformation", 
+  "description": "Fact table loading with FX normalization, deduplication, and comprehensive validation",
+  "settings": {
+    "retry_policy": {
+      "max_attempts": 3,
+      "retry_delay_seconds": 300,
+      "exponential_backoff": true
+    },
+    "timeout_seconds": 1800,
+    "transaction_control": {
+      "enable_rollback": true,
+      "batch_size": 10000,
+      "commit_frequency": 50000
+    },
+    "performance_optimization": {
+      "enable_compression": true,
+      "parallel_processing": true,
+      "use_temp_tables": true
+    }
+  },
   "sql_files": [
     "sql/06_transform_examples.sql"
   ],
-  "notes": "Loads mart.fact_transactions with FX normalization."
+  "transformations": [
+    {
+      "name": "Deduplicate_Source_Data",
+      "description": "Remove duplicates from staging data before processing",
+      "retry_attempts": 1,
+      "timeout_seconds": 300,
+      "sql": "CREATE TEMP TABLE transactions_deduped AS SELECT DISTINCT * FROM stage.transactions_raw WHERE _ingest_dt >= CURRENT_DATE",
+      "validation": {
+        "check_duplicate_reduction": {
+          "sql": "SELECT (SELECT COUNT(*) FROM stage.transactions_raw WHERE _ingest_dt >= CURRENT_DATE) - (SELECT COUNT(*) FROM transactions_deduped)",
+          "description": "Count of duplicates removed"
+        }
+      }
+    },
+    {
+      "name": "Validate_FX_Rates",
+      "description": "Ensure FX rates are available for all required currencies",
+      "retry_attempts": 2,
+      "timeout_seconds": 180,
+      "depends_on": ["Deduplicate_Source_Data"],
+      "pre_conditions": [
+        {
+          "sql": "SELECT COUNT(DISTINCT currency_code) FROM transactions_deduped WHERE currency_code != 'USD'",
+          "description": "Non-USD currencies requiring FX conversion"
+        }
+      ],
+      "sql": "sql/transforms/validate_fx_rates.sql",
+      "validation": {
+        "missing_fx_rates": {
+          "sql": "SELECT COUNT(*) FROM transactions_deduped t LEFT JOIN core.dim_fx fx ON fx.as_of_date = CAST(t.txn_ts AS DATE) AND fx.base_ccy = t.currency_code AND fx.quote_ccy = 'USD' WHERE fx.rate IS NULL AND t.currency_code != 'USD'",
+          "expected_value": 0,
+          "on_failure": "use_default_rates"
+        }
+      }
+    },
+    {
+      "name": "Load_Fact_Transactions",
+      "description": "Main fact table load with FX normalization and integrity checks",
+      "retry_attempts": 3,
+      "timeout_seconds": 1200,
+      "depends_on": ["Validate_FX_Rates"],
+      "sql": "sql/06_transform_examples.sql",
+      "pre_load_cleanup": [
+        "DELETE FROM mart.fact_transactions WHERE load_dt >= CURRENT_DATE"
+      ],
+      "integrity_checks": [
+        {
+          "name": "valid_account_references",
+          "sql": "SELECT COUNT(*) FROM transactions_deduped t LEFT JOIN core.dim_account a ON a.account_id = t.account_id AND a.end_dt IS NULL WHERE a.account_sk IS NULL",
+          "expected_value": 0,
+          "severity": "error"
+        },
+        {
+          "name": "valid_amount_ranges",
+          "sql": "SELECT COUNT(*) FROM transactions_deduped WHERE amount <= 0 OR amount > 1000000",
+          "expected_operator": "<=",
+          "expected_value": 100,
+          "severity": "warning"
+        }
+      ],
+      "post_load_validation": [
+        {
+          "name": "row_count_reconciliation",
+          "sql": "SELECT ABS((SELECT COUNT(*) FROM transactions_deduped) - (SELECT COUNT(*) FROM mart.fact_transactions WHERE load_dt >= CURRENT_DATE))",
+          "expected_operator": "<=", 
+          "expected_value": 5,
+          "description": "Source vs target row count variance should be minimal"
+        },
+        {
+          "name": "amount_balance_check",
+          "sql": "SELECT ABS((SELECT SUM(amount) FROM transactions_deduped WHERE currency_code = 'USD') - (SELECT SUM(amount_usd) FROM mart.fact_transactions WHERE load_dt >= CURRENT_DATE AND currency_code = 'USD'))",
+          "expected_operator": "<=",
+          "expected_value": 1000,
+          "description": "USD amount totals should match between source and target"
+        }
+      ],
+      "on_failure": "rollback_and_quarantine"
+    },
+    {
+      "name": "Update_Load_Statistics",
+      "description": "Update metadata with load statistics and watermarks",
+      "retry_attempts": 1,
+      "timeout_seconds": 60,
+      "depends_on": ["Load_Fact_Transactions"],
+      "sql": "INSERT INTO core.load_watermarks (table_name, last_txn_ts) VALUES ('mart.fact_transactions', (SELECT MAX(txn_ts) FROM transactions_deduped)) ON CONFLICT (table_name) DO UPDATE SET last_txn_ts = EXCLUDED.last_txn_ts",
+      "continue_on_failure": true
+    }
+  ],
+  "error_handling": {
+    "quarantine_table": "quarantine.fact_failures",
+    "log_rejected_records": true,
+    "rollback_on_critical_errors": true,
+    "max_error_rate_percent": 0.1,
+    "critical_errors": [
+      "referential_integrity_violation",
+      "duplicate_key_violation", 
+      "data_type_mismatch"
+    ]
+  },
+  "performance_monitoring": {
+    "track_processing_time": true,
+    "track_row_throughput": true,
+    "alert_on_performance_degradation": true,
+    "baseline_processing_time_minutes": 15,
+    "performance_threshold_multiplier": 2.0
+  },
+  "data_lineage": {
+    "source_tables": [
+      "stage.transactions_raw",
+      "core.dim_account", 
+      "core.dim_customer",
+      "core.dim_branch",
+      "core.dim_date",
+      "core.dim_fx"
+    ],
+    "target_tables": [
+      "mart.fact_transactions"
+    ]
+  },
+  "notes": "Loads mart.fact_transactions with FX normalization, comprehensive validation, and production-ready error handling."
 }

@@ -1,8 +1,89 @@
 {
   "name": "J_TR_Conform_Dimensions",
   "type": "transformation",
+  "description": "Dimension table conformance with SCD Type 2 handling and error recovery",
+  "settings": {
+    "retry_policy": {
+      "max_attempts": 2,
+      "retry_delay_seconds": 300,
+      "exponential_backoff": false
+    },
+    "timeout_seconds": 1200,
+    "transaction_control": {
+      "enable_rollback": true,
+      "checkpoint_frequency": 5000
+    }
+  },
   "sql_files": [
     "sql/06_transform_examples.sql"
   ],
-  "notes": "Implement UPSERTs per dimension; see SQL file."
+  "transformations": [
+    {
+      "name": "Conform_Branches",
+      "description": "Update branch dimension with SCD Type 2",
+      "retry_attempts": 2,
+      "timeout_seconds": 300,
+      "pre_conditions": [
+        {
+          "sql": "SELECT COUNT(*) FROM stage.accounts_raw",
+          "expected_operator": ">",
+          "expected_value": 0
+        }
+      ],
+      "sql": "sql/transforms/branch_scd2.sql",
+      "post_conditions": [
+        {
+          "sql": "SELECT COUNT(*) FROM core.dim_branch WHERE end_dt IS NULL",
+          "expected_operator": ">",
+          "expected_value": 0
+        }
+      ],
+      "on_failure": "rollback_and_retry"
+    },
+    {
+      "name": "Conform_Customers",
+      "description": "Update customer dimension with data quality checks",
+      "retry_attempts": 2,
+      "timeout_seconds": 600,
+      "depends_on": ["Conform_Branches"],
+      "sql": "sql/transforms/customer_scd2.sql",
+      "data_quality_checks": [
+        {
+          "name": "no_duplicate_customers",
+          "sql": "SELECT customer_id, COUNT(*) FROM core.dim_customer WHERE end_dt IS NULL GROUP BY customer_id HAVING COUNT(*) > 1",
+          "expected_rows": 0
+        }
+      ],
+      "on_failure": "quarantine_bad_records"
+    },
+    {
+      "name": "Conform_Accounts", 
+      "description": "Update account dimension with referential integrity checks",
+      "retry_attempts": 1,
+      "timeout_seconds": 300,
+      "depends_on": ["Conform_Customers", "Conform_Branches"],
+      "sql": "sql/transforms/account_scd2.sql",
+      "integrity_checks": [
+        {
+          "name": "valid_customer_references",
+          "sql": "SELECT COUNT(*) FROM core.dim_account a LEFT JOIN core.dim_customer c ON a.customer_id = c.customer_id AND c.end_dt IS NULL WHERE c.customer_id IS NULL AND a.end_dt IS NULL",
+          "expected_value": 0
+        }
+      ],
+      "on_failure": "abort_job"
+    }
+  ],
+  "error_handling": {
+    "quarantine_table": "quarantine.dim_failures",
+    "log_all_errors": true,
+    "continue_on_data_errors": false,
+    "max_error_rate_percent": 1
+  },
+  "monitoring": {
+    "track_row_counts": true,
+    "track_processing_time": true,
+    "alert_on_significant_changes": true,
+    "significant_change_threshold_percent": 20
+  },
+  "notes": "Implement UPSERTs per dimension with comprehensive error handling and SCD Type 2 support."
 }

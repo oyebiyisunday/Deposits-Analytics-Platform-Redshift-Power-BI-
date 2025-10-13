@@ -1,32 +1,157 @@
 {
   "name": "J_ORCH_Load_Deposits",
   "type": "orchestration",
+  "description": "Main ETL orchestration job with retry logic and error handling",
+  "settings": {
+    "retry_policy": {
+      "max_attempts": 3,
+      "retry_delay_seconds": 300,
+      "exponential_backoff": true
+    },
+    "timeout_seconds": 3600,
+    "failure_handling": {
+      "on_failure": "notify_and_cleanup",
+      "cleanup_temp_tables": true,
+      "send_alerts": true
+    }
+  },
   "steps": [
+    {
+      "type": "PreValidation",
+      "name": "Pre_Flight_Checks",
+      "description": "Validate prerequisites before starting ETL",
+      "retry_attempts": 2,
+      "timeout_seconds": 300,
+      "validations": [
+        {
+          "type": "s3_file_check",
+          "bucket_env_var": "S3_RAW_BUCKET",
+          "required_files": [
+            "sqlserver/accounts/",
+            "sqlserver/transactions/",
+            "files/branch_targets/",
+            "api/exchange_rates/"
+          ]
+        },
+        {
+          "type": "redshift_connection_check",
+          "connection": "redshift_prod"
+        }
+      ],
+      "on_failure": "abort_job"
+    },
     {
       "type": "SQLScript",
       "name": "COPY_all",
-      "script_path": "sql/05_copy_commands.sql"
+      "description": "Copy raw data from S3 to staging tables",
+      "script_path": "sql/05_copy_commands.sql",
+      "retry_attempts": 3,
+      "retry_delay_seconds": 180,
+      "timeout_seconds": 1800,
+      "on_failure": "retry_with_backoff",
+      "error_handling": {
+        "ignore_duplicate_keys": true,
+        "continue_on_data_errors": false,
+        "log_rejected_records": true
+      }
+    },
+    {
+      "type": "DataQualityCheck",
+      "name": "Stage_Data_Validation",
+      "description": "Validate staged data quality before transformation",
+      "retry_attempts": 1,
+      "checks": [
+        {
+          "name": "row_count_check",
+          "sql": "SELECT COUNT(*) FROM stage.transactions_raw",
+          "expected_operator": ">",
+          "expected_value": 0
+        },
+        {
+          "name": "null_check",
+          "sql": "SELECT COUNT(*) FROM stage.transactions_raw WHERE txn_id IS NULL",
+          "expected_operator": "=",
+          "expected_value": 0
+        }
+      ],
+      "on_failure": "abort_job"
     },
     {
       "type": "TransformJob",
       "name": "J_TR_Conform_Dimensions",
-      "job": "J_TR_Conform_Dimensions"
+      "job": "J_TR_Conform_Dimensions",
+      "description": "Transform and conform dimension tables",
+      "retry_attempts": 2,
+      "retry_delay_seconds": 300,
+      "timeout_seconds": 1200,
+      "on_failure": "retry_with_cleanup"
     },
     {
       "type": "TransformJob",
       "name": "J_TR_Load_Fact_Transactions",
-      "job": "J_TR_Load_Fact_Transactions"
+      "job": "J_TR_Load_Fact_Transactions",
+      "description": "Load fact table with FX normalization",
+      "retry_attempts": 2,
+      "retry_delay_seconds": 300,
+      "timeout_seconds": 1800,
+      "depends_on": ["J_TR_Conform_Dimensions"],
+      "on_failure": "retry_with_rollback"
     },
     {
       "type": "SQLScript",
       "name": "VACUUM_ANALYZE",
-      "inline_sql": "VACUUM; ANALYZE;"
+      "description": "Optimize tables after data load",
+      "inline_sql": "VACUUM; ANALYZE;",
+      "retry_attempts": 1,
+      "timeout_seconds": 900,
+      "on_failure": "log_and_continue",
+      "continue_on_failure": true
+    },
+    {
+      "type": "DataQualityCheck",
+      "name": "Final_Data_Quality_Validation",
+      "description": "Comprehensive data quality checks after transformation",
+      "retry_attempts": 1,
+      "checks": [
+        {
+          "name": "row_count_reconciliation",
+          "sql": "SELECT ABS((SELECT COUNT(*) FROM stage.transactions_raw) - (SELECT COUNT(*) FROM mart.fact_transactions WHERE load_dt >= CURRENT_DATE))",
+          "expected_operator": "<=",
+          "expected_value": 10
+        },
+        {
+          "name": "null_amount_check",
+          "sql": "SELECT COUNT(*) FROM mart.fact_transactions WHERE amount_usd IS NULL AND load_dt >= CURRENT_DATE",
+          "expected_operator": "=",
+          "expected_value": 0
+        }
+      ],
+      "on_failure": "quarantine_and_alert"
     },
     {
       "type": "Notify",
       "name": "Notify_Success",
       "channel": "sns",
-      "topic_env_var": "SNS_ARN"
+      "topic_env_var": "SNS_ARN",
+      "message_template": "✅ ETL Pipeline completed successfully\\nJob: J_ORCH_Load_Deposits\\nDuration: {{job_duration_minutes}} minutes\\nRows Processed: {{total_rows_processed}}",
+      "on_failure": "log_only"
     }
-  ]
+  ],
+  "error_handlers": [
+    {
+      "trigger": "job_timeout",
+      "action": "send_alert",
+      "message": "🚨 ETL Job Timeout - J_ORCH_Load_Deposits exceeded maximum runtime"
+    },
+    {
+      "trigger": "max_retries_exceeded",
+      "action": "send_critical_alert",
+      "message": "🚨 CRITICAL: ETL Job Failed - J_ORCH_Load_Deposits exceeded maximum retry attempts"
+    }
+  ],
+  "monitoring": {
+    "enable_step_timing": true,
+    "enable_row_count_tracking": true,
+    "cloudwatch_namespace": "bank-deposits-mart-final/ETL"
+  }
 }

@@ -1,0 +1,1 @@
+-- Redshift relies on sort/dist keys; use ANALYZE/VACUUM post-load.

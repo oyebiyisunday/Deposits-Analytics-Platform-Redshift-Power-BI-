@@ -1,0 +1,1 @@
+SELECT 'stage_txn', COUNT(*) FROM stage.transactions_raw UNION ALL SELECT 'fact_txn', COUNT(*) FROM mart.fact_transactions;

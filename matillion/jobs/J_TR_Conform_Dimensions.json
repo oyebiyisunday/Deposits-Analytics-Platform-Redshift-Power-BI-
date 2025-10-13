@@ -1,0 +1,8 @@
+{
+  "name": "J_TR_Conform_Dimensions",
+  "type": "transformation",
+  "sql_files": [
+    "sql/06_transform_examples.sql"
+  ],
+  "notes": "Implement UPSERTs per dimension; see SQL file."
+}

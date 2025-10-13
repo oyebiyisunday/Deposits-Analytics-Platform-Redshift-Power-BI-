@@ -1,0 +1,32 @@
+{
+  "name": "J_ORCH_Load_Deposits",
+  "type": "orchestration",
+  "steps": [
+    {
+      "type": "SQLScript",
+      "name": "COPY_all",
+      "script_path": "sql/05_copy_commands.sql"
+    },
+    {
+      "type": "TransformJob",
+      "name": "J_TR_Conform_Dimensions",
+      "job": "J_TR_Conform_Dimensions"
+    },
+    {
+      "type": "TransformJob",
+      "name": "J_TR_Load_Fact_Transactions",
+      "job": "J_TR_Load_Fact_Transactions"
+    },
+    {
+      "type": "SQLScript",
+      "name": "VACUUM_ANALYZE",
+      "inline_sql": "VACUUM; ANALYZE;"
+    },
+    {
+      "type": "Notify",
+      "name": "Notify_Success",
+      "channel": "sns",
+      "topic_env_var": "SNS_ARN"
+    }
+  ]
+}

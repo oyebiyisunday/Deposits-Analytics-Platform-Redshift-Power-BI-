@@ -1,0 +1,2 @@
+txn_id,account_id,txn_ts,amount,txn_type,currency_code,channel
+T1,A1001,2025-10-01 09:13:00,500.00,deposit,USD,branch

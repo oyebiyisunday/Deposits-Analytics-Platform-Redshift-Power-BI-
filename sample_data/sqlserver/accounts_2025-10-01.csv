@@ -1,0 +1,2 @@
+account_id,customer_id,branch_id,account_open_dt,account_type,currency_code,current_balance,status
+A1001,C1001,B001,2022-01-10,checking,USD,1500.00,active

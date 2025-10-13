@@ -1,0 +1,27 @@
+{
+  "widgets": [
+    {
+      "type": "metric",
+      "properties": {
+        "metrics": [
+          [
+            "AWS/Redshift",
+            "QueryDuration",
+            "ClusterIdentifier",
+            "bank-deposits-mart-final-ra3"
+          ],
+          [
+            "AWS/Redshift",
+            "WLMQueueLength",
+            "ClusterIdentifier",
+            "bank-deposits-mart-final-ra3"
+          ]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "us-east-1",
+        "title": "Redshift Health"
+      }
+    }
+  ]
+}

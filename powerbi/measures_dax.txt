@@ -1,0 +1,3 @@
+Total Deposits USD := CALCULATE(SUM(mart_fact_transactions[amount_usd]), mart_fact_transactions[txn_type]="deposit")
+Total Withdrawals USD := CALCULATE(SUM(mart_fact_transactions[amount_usd]), mart_fact_transactions[txn_type]="withdrawal")
+Net Inflows USD := [Total Deposits USD] - [Total Withdrawals USD]

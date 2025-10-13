@@ -1,0 +1,25 @@
+{
+  "Name": "forward-cw-alarms-to-https",
+  "EventPattern": {
+    "source": [
+      "aws.cloudwatch"
+    ],
+    "detail-type": [
+      "CloudWatch Alarm State Change"
+    ],
+    "detail": {
+      "state": {
+        "value": [
+          "ALARM"
+        ]
+      }
+    }
+  },
+  "Targets": [
+    {
+      "Id": "PagerDutyEventsV2",
+      "Arn": "arn:aws:events:us-east-1:<YOUR_AWS_ACCOUNT_ID>:api-destination/pagerduty-events",
+      "RoleArn": "arn:aws:iam::<YOUR_AWS_ACCOUNT_ID>:role/<EventBridgeInvokeRole>"
+    }
+  ]
+}

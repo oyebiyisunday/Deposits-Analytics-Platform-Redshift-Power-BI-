@@ -1,0 +1,3 @@
+- Connect to Redshift (prefer secure views): mart.v_fact_transactions_secure, mart.v_dim_customer_secure, core.dim_branch, core.dim_date, core.dim_account.
+- Use DirectQuery for strict RLS; Import for speed (ensure gateway and masked views).
+- Pages: Exec Overview, Branch Performance, Segment Analysis.

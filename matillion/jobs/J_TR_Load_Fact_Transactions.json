@@ -1,0 +1,8 @@
+{
+  "name": "J_TR_Load_Fact_Transactions",
+  "type": "transformation",
+  "sql_files": [
+    "sql/06_transform_examples.sql"
+  ],
+  "notes": "Loads mart.fact_transactions with FX normalization."
+}

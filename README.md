@@ -11,9 +11,15 @@ A complete, bank-grade implementation of a Redshift-based data warehouse with S3
 - `monitoring/` — CloudWatch alarms and dashboards; EventBridge routing to PagerDuty/ServiceNow.
 - `powerbi/` — Modeling & security notes; DAX measures; connection guidance.
 - `docs/` — Architecture, warehouse overview, lineage, runbook, and SOPs.
+- `docs/disaster_recovery.md` — Detailed DR plan, RTO/RPO, failover steps.
+- `docs/performance_benchmarking.md` — Baselines and process for benchmark runs.
 - `tests/` — SQL acceptance tests and Lambda unit tests.
 - `sample_data/` — CSV/JSON to smoke-test end-to-end.
 - `sql/templates/` — COPY SQL templates rendered per environment via `scripts/render_sql.py`.
 - `scripts/` — Lambda packaging, SQL rendering, and DQ metrics publisher.
 
 > Configure `bucket_suffix`, Matillion/Redshift secrets, and optional PagerDuty + webhook in Terraform variables (`terraform.tfvars`). Use `scripts/render_sql.py` to render COPY SQL with your environment values.
+CI
+- Terraform checks: fmt/validate/tflint/Checkov via `.github/workflows/terraform.yml`.
+- DQ metrics: `.github/workflows/dq.yml`.
+- Benchmarks: `.github/workflows/benchmarks.yml`.

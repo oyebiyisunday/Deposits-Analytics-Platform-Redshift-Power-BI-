@@ -3,7 +3,7 @@
 
 # Lambda function to trigger Matillion jobs via API
 resource "aws_lambda_function" "matillion_trigger" {
-  filename      = "matillion_trigger.zip"
+  filename      = data.archive_file.matillion_trigger.output_path
   function_name = "${var.project}-matillion-trigger"
   role          = aws_iam_role.lambda_scheduler.arn
   handler       = "app.lambda_handler"

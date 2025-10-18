@@ -21,6 +21,6 @@ resource "aws_redshift_cluster" "this" {
   cluster_subnet_group_name = aws_redshift_subnet_group.sg.name
   publicly_accessible      = false
   skip_final_snapshot      = false
-  vpc_security_group_ids   = [] # attach locked-down SGs in real setup
+  vpc_security_group_ids   = length(var.redshift_security_group_ids) > 0 ? var.redshift_security_group_ids : [aws_security_group.redshift.id]
   cluster_parameter_group_name = aws_redshift_parameter_group.pg.name
 }

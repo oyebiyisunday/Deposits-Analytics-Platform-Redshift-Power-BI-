@@ -1,0 +1,37 @@
+name: DQ Checks
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '15 3 * * *'  # Daily at 03:15 UTC
+
+jobs:
+  run-dq:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements-dev.txt
+      - name: Configure AWS credentials (OIDC)
+        if: env.AWS_ROLE_TO_ASSUME
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION || 'us-east-1' }}
+      - name: Run DQ and publish metrics
+        env:
+          RS_HOST: ${{ secrets.RS_HOST }}
+          RS_USER: ${{ secrets.RS_USER }}
+          RS_PASSWORD: ${{ secrets.RS_PASSWORD }}
+          RS_DB: ${{ secrets.RS_DB || 'dev' }}
+          RS_PORT: ${{ secrets.RS_PORT || '5439' }}
+          PROJECT: ${{ vars.PROJECT || 'bank-deposits-mart-final' }}
+          DQ_METRIC_NAMESPACE: ${{ vars.DQ_METRIC_NAMESPACE || format('{0}/DQ', vars.PROJECT) }}
+        run: |
+          python scripts/dq_publish_metrics.py
+

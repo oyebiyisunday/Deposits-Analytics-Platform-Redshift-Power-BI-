@@ -34,7 +34,8 @@ resource "aws_iam_role_policy" "lambda_access" {
     Version="2012-10-17",
     Statement=[
       {Effect="Allow", Action=["s3:GetObject","s3:ListBucket"], Resource:[aws_s3_bucket.raw.arn,"${aws_s3_bucket.raw.arn}/*"]},
-      {Effect="Allow", Action:["sns:Publish"], Resource:"*"}
+      {Effect="Allow", Action:["sns:Publish"], Resource: aws_sns_topic.alerts.arn},
+      {Effect="Allow", Action:["cloudwatch:PutMetricData"], Resource:"*"}
     ]
   })
 }

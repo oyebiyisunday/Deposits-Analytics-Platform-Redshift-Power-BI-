@@ -1,0 +1,20 @@
+COPY stage.accounts_raw
+FROM 's3://{{project}}-raw-{{bucket_suffix}}/sqlserver/accounts/'
+CREDENTIALS 'aws_iam_role=arn:aws:iam::{{aws_account_id}}:role/{{redshift_role_name}}'
+CSV IGNOREHEADER 1 TIMEFORMAT 'auto' ACCEPTINVCHARS TRUNCATECOLUMNS;
+
+COPY stage.transactions_raw
+FROM 's3://{{project}}-raw-{{bucket_suffix}}/sqlserver/transactions/'
+CREDENTIALS 'aws_iam_role=arn:aws:iam::{{aws_account_id}}:role/{{redshift_role_name}}'
+CSV IGNOREHEADER 1 TIMEFORMAT 'auto' ACCEPTINVCHARS TRUNCATECOLUMNS;
+
+COPY stage.branch_targets_raw
+FROM 's3://{{project}}-raw-{{bucket_suffix}}/files/branch_targets/'
+CREDENTIALS 'aws_iam_role=arn:aws:iam::{{aws_account_id}}:role/{{redshift_role_name}}'
+CSV IGNOREHEADER 1 TIMEFORMAT 'auto';
+
+COPY stage.exchange_rates_raw
+FROM 's3://{{project}}-raw-{{bucket_suffix}}/api/exchange_rates/'
+CREDENTIALS 'aws_iam_role=arn:aws:iam::{{aws_account_id}}:role/{{redshift_role_name}}'
+JSON 'auto';
+

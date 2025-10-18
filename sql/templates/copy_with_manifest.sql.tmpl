@@ -1,0 +1,6 @@
+COPY stage.transactions_raw
+FROM 's3://{{project}}-raw-{{bucket_suffix}}/sqlserver/transactions/manifest/{{manifest_name}}.manifest'
+CREDENTIALS 'aws_iam_role=arn:aws:iam::{{aws_account_id}}:role/{{redshift_role_name}}'
+MANIFEST
+CSV IGNOREHEADER 1 TIMEFORMAT 'auto' ACCEPTINVCHARS;
+

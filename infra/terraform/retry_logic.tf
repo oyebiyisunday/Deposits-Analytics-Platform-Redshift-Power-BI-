@@ -27,7 +27,7 @@ resource "aws_sqs_queue" "matillion_failure_dlq" {
 
 # Enhanced Lambda with Retry Configuration
 resource "aws_lambda_function" "retry_handler" {
-  filename      = "retry_handler.zip"
+  filename      = data.archive_file.retry_handler.output_path
   function_name = "${var.project}-retry-handler"
   role          = aws_iam_role.lambda_retry.arn
   handler       = "app.lambda_handler"

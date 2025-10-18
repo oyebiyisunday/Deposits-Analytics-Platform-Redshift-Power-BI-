@@ -1,6 +1,6 @@
-resource "aws_s3_bucket" "raw"     { bucket = "${var.project}-raw-<unique>" }
-resource "aws_s3_bucket" "stage"   { bucket = "${var.project}-stage-<unique>" }
-resource "aws_s3_bucket" "curated" { bucket = "${var.project}-curated-<unique>" }
+resource "aws_s3_bucket" "raw"     { bucket = "${var.project}-raw-${var.bucket_suffix}" }
+resource "aws_s3_bucket" "stage"   { bucket = "${var.project}-stage-${var.bucket_suffix}" }
+resource "aws_s3_bucket" "curated" { bucket = "${var.project}-curated-${var.bucket_suffix}" }
 
 resource "aws_s3_bucket_public_access_block" "all" {
   for_each = {
@@ -22,7 +22,12 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "enc" {
     curated = aws_s3_bucket.curated.id
   }
   bucket = each.value
-  rule { apply_server_side_encryption_by_default { kms_master_key_id = aws_kms_key.data.arn sse_algorithm = "aws:kms" } }
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = aws_kms_key.data.arn
+      sse_algorithm      = "aws:kms"
+    }
+  }
 }
 
 # Optional lifecycle policies

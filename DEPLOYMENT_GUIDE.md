@@ -18,6 +18,14 @@ This guide covers deploying the enhanced ETL pipeline with:
 
 ## Quick Deployment
 
+### 0. Bootstrap Terraform Backend (one-time)
+```
+cd infra/bootstrap
+terraform init
+terraform apply -var "bucket_name=<global-unique-backend-bucket>"
+```
+Note outputs for bucket and lock table.
+
 ### 1. Configure Variables
 ```
 cd infra/terraform
@@ -38,7 +46,7 @@ matillion_password  = "matillion-password"
 ### 2. Deploy Infrastructure
 Terraform now bundles Lambda code automatically; no manual zips are required.
 ```
-terraform init
+terraform init -backend-config=backend.hcl.example
 terraform plan -var-file=terraform.tfvars
 terraform apply -var-file=terraform.tfvars
 ```
@@ -91,6 +99,9 @@ aws lambda invoke \
 - Optional DQ success webhook: set `dq_webhook_url`.
 - Networking: NAT is enabled by default. Set `allowed_cidrs` to your office/VPN CIDRs for Redshift SG.
  - VPC Endpoints: Enabled by default for S3 (gateway) and Secrets Manager/CloudWatch Logs (interface). Toggle with `enable_vpc_endpoints`.
+ - Backend: Use `infra/terraform/backend.hcl.example` to configure S3 & DynamoDB state/locks.
+ - DR Snapshots: Set `enable_redshift_snapshot_copy=true` with `dr_region` and `dr_kms_key_arn`.
+ - Scheduled scaling: Set `enable_redshift_schedules=true` and cron/node vars.
 
 ## Security Hardening
 

@@ -79,3 +79,41 @@ variable "eventbridge_invoke_role_arn" {
   default     = null
   description = "IAM role ARN allowing EventBridge to call API destinations."
 }
+
+# Glue/Lake Formation for curated Parquet
+variable "glue_db_name" {
+  type        = string
+  default     = "curated_db"
+  description = "AWS Glue database name for curated datasets."
+}
+
+variable "enable_lake_formation" {
+  type        = bool
+  default     = false
+  description = "Enable Lake Formation and grants for curated data."
+}
+
+variable "lake_formation_admins" {
+  type        = list(string)
+  default     = []
+  description = "Lake Formation admin principals (IAM ARNs)."
+}
+
+# SageMaker
+variable "enable_sagemaker_notebook" {
+  type        = bool
+  default     = false
+  description = "Provision a SageMaker notebook instance in the VPC."
+}
+
+variable "sagemaker_instance_type" {
+  type        = string
+  default     = "ml.t3.medium"
+  description = "Instance type for SageMaker notebook."
+}
+
+variable "enable_feature_store" {
+  type        = bool
+  default     = false
+  description = "Provision an example SageMaker Feature Store group."
+}

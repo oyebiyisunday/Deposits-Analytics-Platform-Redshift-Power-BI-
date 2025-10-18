@@ -17,9 +17,16 @@ A complete, bank-grade implementation of a Redshift-based data warehouse with S3
 - `sample_data/` — CSV/JSON to smoke-test end-to-end.
 - `sql/templates/` — COPY SQL templates rendered per environment via `scripts/render_sql.py`.
 - `scripts/` — Lambda packaging, SQL rendering, and DQ metrics publisher.
+- `notebooks/` — ML quickstart notebook for SageMaker.
 
 > Configure `bucket_suffix`, Matillion/Redshift secrets, and optional PagerDuty + webhook in Terraform variables (`terraform.tfvars`). Use `scripts/render_sql.py` to render COPY SQL with your environment values.
 CI
 - Terraform checks: fmt/validate/tflint/Checkov via `.github/workflows/terraform.yml`.
 - DQ metrics: `.github/workflows/dq.yml`.
 - Benchmarks: `.github/workflows/benchmarks.yml`.
+
+ML Readiness
+- Glue Catalog + Crawler for curated Parquet (toggle via Terraform).
+- Lake Formation permissions (optional) to govern table access.
+- Redshift UNLOAD templates to publish curated data to S3 Parquet.
+- SageMaker notebook (optional) with example training and batch scoring scripts.

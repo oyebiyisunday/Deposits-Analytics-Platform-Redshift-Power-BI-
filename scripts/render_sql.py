@@ -37,7 +37,11 @@ def main():
         f"{args.out_dir}/copy_with_manifest.sql",
         mapping,
     )
+    render_template(
+        "sql/templates/unload_curated_parquet.sql.tmpl",
+        f"{args.out_dir}/unload_curated_parquet.sql",
+        mapping,
+    )
 
 if __name__ == "__main__":
     main()
-

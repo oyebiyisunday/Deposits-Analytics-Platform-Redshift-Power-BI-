@@ -1,0 +1,21 @@
+UNLOAD (
+  $$
+  SELECT 
+    f.txn_id,
+    da.account_id,
+    dc.customer_id,
+    dd.full_date AS txn_date,
+    f.amount_usd,
+    f.txn_type,
+    f.channel
+  FROM mart.fact_transactions f
+  JOIN core.dim_account da  ON da.account_sk=f.account_sk AND da.end_dt IS NULL
+  JOIN core.dim_customer dc ON dc.customer_sk=f.customer_sk AND dc.end_dt IS NULL
+  JOIN core.dim_date dd      ON dd.date_sk=f.txn_date_sk
+  $$
+)
+TO 's3://{{project}}-curated-{{bucket_suffix}}/ml/fact_transactions/'
+IAM_ROLE 'arn:aws:iam::{{aws_account_id}}:role/{{redshift_role_name}}'
+FORMAT PARQUET PARTITION BY (txn_type)
+ALLOWOVERWRITE CLEANPATH;
+

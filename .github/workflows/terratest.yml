@@ -1,0 +1,26 @@
+name: Terratest
+
+on:
+  pull_request:
+    paths:
+      - 'infra/terraform/**'
+      - 'test/terratest/**'
+
+jobs:
+  terratest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Go mod init and get terratest
+        working-directory: test/terratest
+        run: |
+          if [ ! -f go.mod ]; then go mod init terratest && go get github.com/gruntwork-io/terratest/modules/terraform@v0.46.7; fi
+          go mod tidy
+      - name: Run Terratest (validate only)
+        working-directory: test/terratest
+        run: go test -v -run TestTerraformValidate
+

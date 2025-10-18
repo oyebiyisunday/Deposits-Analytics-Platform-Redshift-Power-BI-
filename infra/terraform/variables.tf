@@ -117,3 +117,25 @@ variable "enable_feature_store" {
   default     = false
   description = "Provision an example SageMaker Feature Store group."
 }
+
+# PgBouncer (connection pooling)
+variable "enable_pgbouncer" {
+  type        = bool
+  default     = false
+  description = "Deploy PgBouncer on ECS Fargate for Redshift pooling."
+}
+variable "pgbouncer_desired_count" { type = number, default = 1 }
+variable "pgbouncer_allowed_cidrs" {
+  type        = list(string)
+  default     = []
+  description = "CIDRs allowed to connect to PgBouncer NLB (clients/BI)."
+}
+variable "pgbouncer_max_client_conn" { type = number, default = 200 }
+
+# S3 Cross-Region Replication (CRR)
+variable "enable_crr" {
+  type        = bool
+  default     = false
+  description = "Enable S3 bucket replication to DR region."
+}
+variable "crr_retention_days" { type = number, default = 365 }

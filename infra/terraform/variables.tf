@@ -139,3 +139,54 @@ variable "enable_crr" {
   description = "Enable S3 bucket replication to DR region."
 }
 variable "crr_retention_days" { type = number, default = 365 }
+
+# Cost controls
+variable "enable_budgets" {
+  type        = bool
+  default     = false
+  description = "Create an AWS Budget for monthly costs with email alerts."
+}
+
+variable "budget_amount" {
+  type        = number
+  default     = 500
+  description = "Monthly budget amount in USD."
+}
+
+variable "budget_emails" {
+  type        = list(string)
+  default     = []
+  description = "Email addresses to notify for budget and anomaly alerts."
+}
+
+variable "enable_cost_anomaly_detection" {
+  type        = bool
+  default     = false
+  description = "Enable Cost Explorer anomaly monitor and subscription."
+}
+
+# Redshift ops
+variable "redshift_maintenance_cron" {
+  type        = string
+  default     = "cron(30 2 * * ? *)" # 02:30 UTC daily
+  description = "EventBridge schedule for Redshift VACUUM/ANALYZE maintenance."
+}
+
+variable "redshift_database" {
+  type        = string
+  default     = "dev"
+  description = "Default Redshift database name for maintenance jobs."
+}
+
+# Redshift tuning
+variable "enable_redshift_sqa" {
+  type        = bool
+  default     = true
+  description = "Enable Short Query Acceleration in Redshift parameter group."
+}
+
+variable "max_concurrency_scaling_clusters" {
+  type        = number
+  default     = 1
+  description = "Max concurrency scaling clusters for Redshift."
+}

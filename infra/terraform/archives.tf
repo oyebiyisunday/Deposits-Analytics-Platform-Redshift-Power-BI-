@@ -27,3 +27,9 @@ data "archive_file" "dq_metrics_publisher" {
   source_dir  = "../../lambda/dq_metrics_publisher"
   output_path = "./dist/dq_metrics_publisher.zip"
 }
+
+data "archive_file" "redshift_maintenance" {
+  type        = "zip"
+  source_dir  = "../../lambda/redshift_maintenance"
+  output_path = "./dist/redshift_maintenance.zip"
+}

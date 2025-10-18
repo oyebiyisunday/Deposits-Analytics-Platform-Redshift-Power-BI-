@@ -6,7 +6,9 @@ resource "aws_redshift_subnet_group" "sg" {
 resource "aws_redshift_parameter_group" "pg" {
   name   = "${var.project}-params"
   family = "redshift-1.0"
-  parameter { name="enable_user_activity_logging" value="true" }
+  parameter { name = "enable_user_activity_logging"      value = "true" }
+  parameter { name = "enable_short_query_acceleration"   value = tostring(var.enable_redshift_sqa) }
+  parameter { name = "max_concurrency_scaling_clusters"  value = tostring(var.max_concurrency_scaling_clusters) }
 }
 
 resource "aws_redshift_cluster" "this" {

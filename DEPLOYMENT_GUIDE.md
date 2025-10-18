@@ -53,14 +53,14 @@ terraform apply -var-file=terraform.tfvars
 
 ### 3. Configure Secrets
 ```
-# Store Matillion credentials
+# Store Matillion credentials (use your project value)
 aws secretsmanager create-secret \
-  --name "bank-deposits-mart-final/matillion" \
+  --name "<project>/matillion" \
   --secret-string '{"username":"user","password":"pass"}'
 
 # Store Redshift credentials
 aws secretsmanager create-secret \
-  --name "bank-deposits-mart-final/redshift" \
+  --name "<project>/redshift" \
   --secret-string '{"host":"endpoint","username":"user","password":"pass"}'
 ```
 
@@ -82,7 +82,7 @@ CloudWatch dashboards are provisioned by Terraform (`aws_cloudwatch_dashboard`).
 ### Test Scheduling
 ```
 aws lambda invoke \
-  --function-name bank-deposits-mart-final-matillion-trigger \
+  --function-name <project>-matillion-trigger \
   --payload '{"job_name":"J_ORCH_Load_Deposits","manual_trigger":true}' \
   response.json
 ```
@@ -113,7 +113,7 @@ aws lambda invoke \
 Use the renderer to produce environment-specific COPY scripts:
 ```
 python scripts/render_sql.py \
-  --project bank-deposits-mart-final \
+  --project <project> \
   --bucket-suffix <your-suffix> \
   --aws-account-id <acct-id> \
   --redshift-role-name <RedshiftS3ReadRole>
@@ -142,7 +142,7 @@ Outputs in `dist/sql/`.
 ## Support
 
 - Logs: CloudWatch `/aws/lambda/` groups
-- Metrics: Custom namespace `bank-deposits-mart-final/`
+- Metrics: Custom namespace `<project>/`
 - Alerts: SNS topic for notifications
 - Dashboards: CloudWatch for real-time monitoring
 

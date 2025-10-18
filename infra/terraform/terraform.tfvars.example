@@ -1,0 +1,23 @@
+region              = "us-east-1"
+project             = "bank-analytics-platform"
+bucket_suffix       = "your-unique-suffix"
+
+redshift_username   = "your-username"
+redshift_password   = "your-password"
+
+# Matillion (optional)
+matillion_base_url  = "https://your-matillion.example.com"
+matillion_user      = "matillion-user"
+matillion_password  = "matillion-password"
+
+# Networking
+allowed_cidrs       = ["x.x.x.x/32"]
+
+# Optional toggles
+enable_pagerduty         = false
+enable_vpc_endpoints     = true
+enable_sagemaker_notebook= false
+enable_feature_store     = false
+enable_lake_formation    = false
+enable_crr               = false
+enable_pgbouncer         = false

@@ -1,5 +1,5 @@
 variable "region" { type=string default="us-east-1" }
-variable "project" { type=string default="bank-deposits-mart-final" }
+variable "project" { type=string default="bank-analytics-platform" }
 variable "bucket_suffix" { type=string description="Unique suffix for S3 bucket names (DNS-safe)." }
 variable "vpc_cidr" { type=string default="10.42.0.0/16" }
 variable "private_subnets" { type=list(string) default=["10.42.1.0/24","10.42.2.0/24"] }

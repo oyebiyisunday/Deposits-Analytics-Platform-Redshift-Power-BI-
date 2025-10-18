@@ -18,7 +18,7 @@ def run_query(cur, sql):
     return (time.time() - t0) * 1000.0
 
 def main():
-    ns = os.environ.get("BENCH_NAMESPACE", f"{os.environ.get('PROJECT','bank-deposits-mart-final')}/Benchmarks")
+    ns = os.environ.get("BENCH_NAMESPACE", f"{os.environ.get('PROJECT','bank-analytics-platform')}/Benchmarks")
     conn = psycopg2.connect(
         host=os.environ["RS_HOST"], user=os.environ["RS_USER"], password=os.environ["RS_PASSWORD"],
         dbname=os.environ.get("RS_DB","dev"), port=int(os.environ.get("RS_PORT","5439"))
@@ -42,4 +42,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

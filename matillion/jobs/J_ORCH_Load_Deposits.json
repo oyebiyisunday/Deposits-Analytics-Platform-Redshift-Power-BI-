@@ -152,6 +152,6 @@
   "monitoring": {
     "enable_step_timing": true,
     "enable_row_count_tracking": true,
-    "cloudwatch_namespace": "bank-deposits-mart-final/ETL"
+    "cloudwatch_namespace": "bank-analytics-platform/ETL"
   }
 }

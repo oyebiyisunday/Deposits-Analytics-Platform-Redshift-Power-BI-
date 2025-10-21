@@ -47,6 +47,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "raw_lifecycle" {
   rule {
     id = "glacier-archive"
     status = "Enabled"
+    transition { days = 30 storage_class = "INTELLIGENT_TIERING" }
     transition { days = 120 storage_class = "GLACIER" }
   }
 }

@@ -7,3 +7,17 @@ terraform {
   backend "s3" {}
 }
 provider "aws" { region = var.region }
+ 
+# Default tags for cost and ownership
+provider "aws" {
+  region = var.region
+  default_tags {
+    tags = {
+      Project            = var.project
+      Environment        = var.environment
+      Owner              = coalesce(var.owner, "unknown")
+      CostCenter         = coalesce(var.cost_center, "unspecified")
+      DataClassification = var.data_classification
+    }
+  }
+}

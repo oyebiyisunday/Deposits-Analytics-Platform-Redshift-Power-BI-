@@ -82,6 +82,43 @@ resource "aws_lambda_function" "redshift_maintenance" {
   depends_on = [aws_iam_role_policy_attachment.lambda_basic]
 }
 
+# Redshift Autoscaler (optional) — checks metrics and adjusts nodes
+resource "aws_lambda_function" "redshift_autoscaler" {
+  filename         = data.archive_file.redshift_autoscaler.output_path
+  function_name    = "${var.project}-redshift-autoscaler"
+  role             = aws_iam_role.lambda.arn
+  handler          = "app.lambda_handler"
+  runtime          = "python3.12"
+  timeout          = 60
+
+  environment {
+    variables = {
+      CLUSTER_IDENTIFIER = aws_redshift_cluster.this.cluster_identifier
+      MIN_NODES          = tostring(var.offpeak_nodes)
+      MAX_NODES          = tostring(var.peak_nodes)
+      WLM_THRESHOLD      = "5"
+      CPU_THRESHOLD      = "85"
+    }
+  }
+}
+
+# Redshift Backup Check — publishes snapshot age metric
+resource "aws_lambda_function" "redshift_backup_check" {
+  filename         = data.archive_file.redshift_backup_check.output_path
+  function_name    = "${var.project}-redshift-backup-check"
+  role             = aws_iam_role.lambda.arn
+  handler          = "app.lambda_handler"
+  runtime          = "python3.12"
+  timeout          = 60
+
+  environment {
+    variables = {
+      CLUSTER_IDENTIFIER = aws_redshift_cluster.this.cluster_identifier
+      METRIC_NAMESPACE   = "${var.project}/Backup"
+    }
+  }
+}
+
 resource "aws_cloudwatch_event_rule" "redshift_maintenance" {
   name                = "${var.project}-redshift-maint"
   schedule_expression = var.redshift_maintenance_cron

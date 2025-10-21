@@ -1,5 +1,9 @@
 variable "region" { type=string default="us-east-1" }
 variable "project" { type=string default="deposits-analytics-platform" }
+variable "environment" { type = string, default = "dev", description = "Environment tag (dev|stage|prod)" }
+variable "cost_center" { type = string, default = null, description = "Optional cost center tag" }
+variable "owner" { type = string, default = null, description = "Service owner (email or team)" }
+variable "data_classification" { type = string, default = "confidential", description = "Data classification tag" }
 variable "bucket_suffix" { type=string description="Unique suffix for S3 bucket names (DNS-safe)." }
 variable "vpc_cidr" { type=string default="10.42.0.0/16" }
 variable "private_subnets" { type=list(string) default=["10.42.1.0/24","10.42.2.0/24"] }

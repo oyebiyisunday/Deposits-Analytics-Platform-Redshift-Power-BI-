@@ -33,3 +33,15 @@ data "archive_file" "redshift_maintenance" {
   source_dir  = "../../lambda/redshift_maintenance"
   output_path = "./dist/redshift_maintenance.zip"
 }
+
+data "archive_file" "redshift_autoscaler" {
+  type        = "zip"
+  source_dir  = "../../lambda/redshift_autoscaler"
+  output_path = "./dist/redshift_autoscaler.zip"
+}
+
+data "archive_file" "redshift_backup_check" {
+  type        = "zip"
+  source_dir  = "../../lambda/redshift_backup_check"
+  output_path = "./dist/redshift_backup_check.zip"
+}

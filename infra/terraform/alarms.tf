@@ -199,3 +199,58 @@ resource "aws_cloudwatch_metric_alarm" "redshift_wlm_queue" {
   ok_actions          = local.alarm_actions
 }
 
+# Redshift Query Duration (avg) high
+variable "redshift_query_duration_ms" { type = number, default = 2000 }
+resource "aws_cloudwatch_metric_alarm" "redshift_query_duration" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project}-Redshift-QueryDuration"
+  alarm_description   = "Redshift average QueryDuration above threshold"
+  namespace           = "AWS/Redshift"
+  metric_name         = "QueryDuration"
+  dimensions          = { ClusterIdentifier = aws_redshift_cluster.this.cluster_identifier }
+  comparison_operator = "GreaterThanThreshold"
+  threshold           = var.redshift_query_duration_ms
+  evaluation_periods  = 2
+  period              = 300
+  statistic           = "Average"
+  treat_missing_data  = "notBreaching"
+  alarm_actions       = local.alarm_actions
+  ok_actions          = local.alarm_actions
+}
+
+# DB Connections high
+variable "redshift_db_connections_threshold" { type = number, default = 200 }
+resource "aws_cloudwatch_metric_alarm" "redshift_db_connections" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project}-Redshift-DBConnections"
+  alarm_description   = "Redshift DatabaseConnections above threshold"
+  namespace           = "AWS/Redshift"
+  metric_name         = "DatabaseConnections"
+  dimensions          = { ClusterIdentifier = aws_redshift_cluster.this.cluster_identifier }
+  comparison_operator = "GreaterThanThreshold"
+  threshold           = var.redshift_db_connections_threshold
+  evaluation_periods  = 2
+  period              = 300
+  statistic           = "Average"
+  treat_missing_data  = "notBreaching"
+  alarm_actions       = local.alarm_actions
+  ok_actions          = local.alarm_actions
+}
+
+# Backup age alarm
+variable "backup_age_hours_threshold" { type = number, default = 26 }
+resource "aws_cloudwatch_metric_alarm" "backup_age" {
+  count               = var.enable_alarms ? 1 : 0
+  alarm_name          = "${var.project}-Backup-Age"
+  alarm_description   = "Latest Redshift snapshot age exceeds threshold"
+  namespace           = "${var.project}/Backup"
+  metric_name         = "BackupAgeHours"
+  comparison_operator = "GreaterThanThreshold"
+  threshold           = var.backup_age_hours_threshold
+  evaluation_periods  = 1
+  period              = 3600
+  statistic           = "Maximum"
+  treat_missing_data  = "breaching"
+  alarm_actions       = local.alarm_actions
+  ok_actions          = local.alarm_actions
+}

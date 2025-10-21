@@ -37,7 +37,9 @@ resource "aws_iam_role_policy" "lambda_access" {
       {Effect="Allow", Action:["sns:Publish"], Resource: aws_sns_topic.alerts.arn},
       {Effect="Allow", Action:["cloudwatch:PutMetricData"], Resource:"*"},
       {Effect="Allow", Action:["redshift-data:ExecuteStatement","redshift-data:GetStatementResult"], Resource:"*"},
-      {Effect="Allow", Action:["secretsmanager:GetSecretValue"], Resource: aws_secretsmanager_secret.redshift.arn}
+      {Effect="Allow", Action:["secretsmanager:GetSecretValue"], Resource: aws_secretsmanager_secret.redshift.arn},
+      {Effect="Allow", Action:["redshift:ModifyCluster","redshift:DescribeClusters"], Resource: "*"},
+      {Effect="Allow", Action:["cloudwatch:GetMetricData","cloudwatch:GetMetricStatistics"], Resource: "*"}
     ]
   })
 }

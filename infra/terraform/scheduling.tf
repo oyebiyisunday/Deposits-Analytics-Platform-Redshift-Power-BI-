@@ -106,3 +106,43 @@ resource "aws_lambda_permission" "allow_eventbridge_matillion" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.daily_etl_schedule.arn
 }
+
+# Autoscaler: every 15 minutes
+resource "aws_cloudwatch_event_rule" "redshift_autoscaler" {
+  name                = "${var.project}-redshift-autoscaler"
+  schedule_expression = "cron(0/15 * * * ? *)"
+}
+
+resource "aws_cloudwatch_event_target" "redshift_autoscaler" {
+  rule      = aws_cloudwatch_event_rule.redshift_autoscaler.name
+  target_id = "RedshiftAutoscaler"
+  arn       = aws_lambda_function.redshift_autoscaler.arn
+}
+
+resource "aws_lambda_permission" "allow_eventbridge_autoscaler" {
+  statement_id  = "AllowExecutionFromEventBridgeAutoscaler"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.redshift_autoscaler.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.redshift_autoscaler.arn
+}
+
+# Backup check: daily
+resource "aws_cloudwatch_event_rule" "redshift_backup_check" {
+  name                = "${var.project}-redshift-backup-check"
+  schedule_expression = "cron(0 3 * * ? *)" # 03:00 UTC daily
+}
+
+resource "aws_cloudwatch_event_target" "redshift_backup_check" {
+  rule      = aws_cloudwatch_event_rule.redshift_backup_check.name
+  target_id = "RedshiftBackupCheck"
+  arn       = aws_lambda_function.redshift_backup_check.arn
+}
+
+resource "aws_lambda_permission" "allow_eventbridge_backup_check" {
+  statement_id  = "AllowExecutionFromEventBridgeBackupCheck"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.redshift_backup_check.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.redshift_backup_check.arn
+}

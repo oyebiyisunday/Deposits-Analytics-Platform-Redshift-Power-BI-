@@ -1,5 +1,5 @@
 variable "region" { type=string default="us-east-1" }
-variable "project" { type=string default="bank-analytics-platform" }
+variable "project" { type=string default="deposits-analytics-platform" }
 variable "bucket_suffix" { type=string description="Unique suffix for S3 bucket names (DNS-safe)." }
 variable "vpc_cidr" { type=string default="10.42.0.0/16" }
 variable "private_subnets" { type=list(string) default=["10.42.1.0/24","10.42.2.0/24"] }
@@ -189,4 +189,11 @@ variable "max_concurrency_scaling_clusters" {
   type        = number
   default     = 1
   description = "Max concurrency scaling clusters for Redshift."
+}
+
+# Redshift automated snapshot retention (days)
+variable "redshift_automated_snapshot_retention" {
+  type        = number
+  default     = 7
+  description = "Automated snapshot retention period for Redshift (days)."
 }

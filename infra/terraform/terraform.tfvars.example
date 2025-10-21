@@ -1,5 +1,5 @@
 region              = "us-east-1"
-project             = "bank-analytics-platform"
+project             = "deposits-analytics-platform"
 bucket_suffix       = "your-unique-suffix"
 
 redshift_username   = "your-username"

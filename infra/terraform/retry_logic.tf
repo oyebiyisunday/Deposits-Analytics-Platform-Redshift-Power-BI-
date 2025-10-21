@@ -31,7 +31,7 @@ resource "aws_lambda_function" "retry_handler" {
   function_name = "${var.project}-retry-handler"
   role          = aws_iam_role.lambda_retry.arn
   handler       = "app.lambda_handler"
-  runtime       = "python3.9"
+  runtime       = "python3.12"
   timeout       = 900  # 15 minutes
   memory_size   = 512
 

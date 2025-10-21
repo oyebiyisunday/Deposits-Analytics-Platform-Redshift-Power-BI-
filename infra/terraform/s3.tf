@@ -2,6 +2,17 @@ resource "aws_s3_bucket" "raw"     { bucket = "${var.project}-raw-${var.bucket_s
 resource "aws_s3_bucket" "stage"   { bucket = "${var.project}-stage-${var.bucket_suffix}" }
 resource "aws_s3_bucket" "curated" { bucket = "${var.project}-curated-${var.bucket_suffix}" }
 
+# Enable versioning for data buckets (best practice)
+resource "aws_s3_bucket_versioning" "data" {
+  for_each = {
+    raw     = aws_s3_bucket.raw.id
+    stage   = aws_s3_bucket.stage.id
+    curated = aws_s3_bucket.curated.id
+  }
+  bucket = each.value
+  versioning_configuration { status = "Enabled" }
+}
+
 resource "aws_s3_bucket_public_access_block" "all" {
   for_each = {
     raw = aws_s3_bucket.raw.id

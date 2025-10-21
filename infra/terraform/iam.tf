@@ -35,7 +35,9 @@ resource "aws_iam_role_policy" "lambda_access" {
     Statement=[
       {Effect="Allow", Action=["s3:GetObject","s3:ListBucket"], Resource:[aws_s3_bucket.raw.arn,"${aws_s3_bucket.raw.arn}/*"]},
       {Effect="Allow", Action:["sns:Publish"], Resource: aws_sns_topic.alerts.arn},
-      {Effect="Allow", Action:["cloudwatch:PutMetricData"], Resource:"*"}
+      {Effect="Allow", Action:["cloudwatch:PutMetricData"], Resource:"*"},
+      {Effect="Allow", Action:["redshift-data:ExecuteStatement","redshift-data:GetStatementResult"], Resource:"*"},
+      {Effect="Allow", Action:["secretsmanager:GetSecretValue"], Resource: aws_secretsmanager_secret.redshift.arn}
     ]
   })
 }

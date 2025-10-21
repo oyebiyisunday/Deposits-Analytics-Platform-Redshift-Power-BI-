@@ -7,7 +7,7 @@ resource "aws_lambda_function" "matillion_trigger" {
   function_name = "${var.project}-matillion-trigger"
   role          = aws_iam_role.lambda_scheduler.arn
   handler       = "app.lambda_handler"
-  runtime       = "python3.9"
+  runtime       = "python3.12"
   timeout       = 300
 
   environment {

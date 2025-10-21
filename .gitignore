@@ -1,24 +1,29 @@
 # Terraform
 .terraform/
-terraform.tfstate*
-*.tfplan
-crash.log
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+backend.hcl
+backend-*.hcl
+terraform.tfvars.json
+
+# Build artifacts
+dist/
+*.zip
 
 # Python
 __pycache__/
 *.pyc
 .pytest_cache/
-
-# Node/OS/editor
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
-
-# Build/output
-dist/
-*.zip
+.venv/
+venv/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# OS/IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
 

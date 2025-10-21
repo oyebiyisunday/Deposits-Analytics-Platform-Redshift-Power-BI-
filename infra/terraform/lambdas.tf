@@ -3,7 +3,7 @@ resource "aws_lambda_function" "validate_schema_prod" {
   function_name    = "${var.project}-validate-schema"
   role             = aws_iam_role.lambda.arn
   handler          = "app.lambda_handler"
-  runtime          = "python3.9"
+  runtime          = "python3.12"
   timeout          = 60
 
   environment {
@@ -22,7 +22,7 @@ resource "aws_lambda_function" "dq_success_notifier" {
   function_name    = "${var.project}-dq-success-notifier"
   role             = aws_iam_role.lambda.arn
   handler          = "app.lambda_handler"
-  runtime          = "python3.9"
+  runtime          = "python3.12"
   timeout          = 30
 
   environment {
@@ -51,7 +51,7 @@ resource "aws_lambda_function" "dq_metrics_publisher" {
   function_name    = "${var.project}-dq-metrics"
   role             = aws_iam_role.lambda.arn
   handler          = "app.lambda_handler"
-  runtime          = "python3.9"
+  runtime          = "python3.12"
   timeout          = 30
 
   environment {
@@ -68,7 +68,7 @@ resource "aws_lambda_function" "redshift_maintenance" {
   function_name    = "${var.project}-redshift-maintenance"
   role             = aws_iam_role.lambda.arn
   handler          = "app.lambda_handler"
-  runtime          = "python3.9"
+  runtime          = "python3.12"
   timeout          = 300
 
   environment {

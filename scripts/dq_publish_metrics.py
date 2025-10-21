@@ -43,7 +43,7 @@ def publish(results: list, namespace: str):
     print(json.dumps({"failures": failures, "count": len(results)}, indent=2))
 
 def main():
-    ns = os.environ.get("DQ_METRIC_NAMESPACE", f"{os.environ.get('PROJECT','bank-analytics-platform')}/DQ")
+    ns = os.environ.get("DQ_METRIC_NAMESPACE", f"{os.environ.get('PROJECT','deposits-analytics-platform')}/DQ")
     results = run_dq_checks()
     publish(results, ns)
 

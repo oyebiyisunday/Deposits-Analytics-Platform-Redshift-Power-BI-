@@ -105,8 +105,9 @@ resource "aws_ecs_task_definition" "pgb" {
         { name = "PGBOUNCER_POOL_MODE",      value = "transaction" }
       ],
       secrets = [
-        { name = "PGBOUNCER_AUTH_USER",    valueFrom = aws_secretsmanager_secret.redshift.arn },
-        { name = "PGBOUNCER_AUTH_PASSWORD",valueFrom = aws_secretsmanager_secret.redshift.arn }
+        # Reference specific JSON keys from the Redshift secret
+        { name = "PGBOUNCER_AUTH_USER",     valueFrom = "${aws_secretsmanager_secret.redshift.arn}:username::" },
+        { name = "PGBOUNCER_AUTH_PASSWORD", valueFrom = "${aws_secretsmanager_secret.redshift.arn}:password::" }
       ],
       logConfiguration = {
         logDriver = "awslogs",

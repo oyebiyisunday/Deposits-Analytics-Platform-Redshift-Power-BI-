@@ -18,7 +18,7 @@ A complete, bank-grade implementation of a Redshift-based data warehouse with S3
 - `scripts/` — SQL rendering, DQ metrics publisher, benchmarks, canary utilities.
 - `notebooks/` — ML quickstart notebook for SageMaker.
 
-> Configure `bucket_suffix`, Matillion/Redshift secrets, and optional PagerDuty + webhook in Terraform variables (`terraform.tfvars`). Use `scripts/render_sql.py` to render COPY/UNLOAD SQL with your environment values.
+> Configure `bucket_suffix`, Matillion/Redshift secrets, and optional PagerDuty + webhook in Terraform variables (`terraform.tfvars`). Use `scripts/render_sql.py` to render COPY/UNLOAD SQL with environment-specific values.
 
 CI
 - Terraform checks: fmt/validate/tflint/Checkov via `.github/workflows/terraform.yml`.

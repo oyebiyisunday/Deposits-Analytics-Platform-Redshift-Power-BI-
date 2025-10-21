@@ -1,6 +1,6 @@
 # Quickstart — Deposits Analytics Platform
 
-This guide gets you to a production‑ready deployment with minimal steps. After connecting your AWS account, run the bootstrap and deploy scripts, then validate the pipeline.
+Production‑ready deployment steps with minimal inputs. After connecting an AWS account, run the bootstrap and deploy scripts, then validate the pipeline.
 
 ## Prerequisites
 - AWS account with admin permissions (bootstrap) and least‑privileged role for deployment
@@ -16,7 +16,7 @@ Windows (PowerShell)
 macOS/Linux
 - `bash bin/bootstrap.sh us-east-1 <unique-backend-bucket> terraform-state-locks`
 
-Copy the outputs into an environment backend config, e.g. `infra/terraform/backend-dev.hcl.example` → `backend-dev.hcl`.
+Copy outputs into an environment backend config, e.g. `infra/terraform/backend-dev.hcl.example` → `backend-dev.hcl`.
 
 ## 2) Configure environment variables
 Copy `infra/terraform/terraform.tfvars.example` to `infra/terraform/terraform.tfvars` and set values:
@@ -54,4 +54,3 @@ GitHub Actions included for Terraform validate, Python syntax, and manual DQ. Fo
 - `terraform plan` errors: ensure `hashicorp/archive` provider is present (already required in providers.tf).
 - Lambda packaging: Terraform will zip from `lambda/*` directories automatically.
 - S3 access/logging: Access logs written to `<project>-logs-<suffix>` bucket.
-

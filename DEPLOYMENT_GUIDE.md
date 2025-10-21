@@ -1,4 +1,4 @@
-# Production Deployment Guide for ETL Pipeline
+﻿# Production Deployment Guide for ETL Pipeline
 
 ## Production-Ready ETL Pipeline Deployment
 
@@ -53,7 +53,7 @@ terraform apply -var-file=terraform.tfvars
 
 ### 3. Configure Secrets
 ```
-# Store Matillion credentials (use your project value)
+# Store Matillion credentials (set the project value)
 aws secretsmanager create-secret \
   --name "<project>/matillion" \
   --secret-string '{"username":"user","password":"pass"}'
@@ -97,7 +97,7 @@ aws lambda invoke \
 - Set `bucket_suffix`, `matillion_*`, and Redshift credentials in `terraform.tfvars`.
 - To enable PagerDuty forwarding, set `enable_pagerduty=true`, `pagerduty_token`, and `eventbridge_invoke_role_arn`.
 - Optional DQ success webhook: set `dq_webhook_url`.
-- Networking: NAT is enabled by default. Set `allowed_cidrs` to your office/VPN CIDRs for Redshift SG.
+- Networking: NAT is enabled by default. Set `allowed_cidrs` to office/VPN CIDRs for Redshift SG.
  - VPC Endpoints: Enabled by default for S3 (gateway) and Secrets Manager/CloudWatch Logs (interface). Toggle with `enable_vpc_endpoints`.
  - Backend: Use `infra/terraform/backend.hcl.example` to configure S3 & DynamoDB state/locks.
  - DR Snapshots: Set `enable_redshift_snapshot_copy=true` with `dr_region` and `dr_kms_key_arn`.
@@ -147,3 +147,4 @@ Outputs in `dist/sql/`.
 - Dashboards: CloudWatch for real-time monitoring
 
 Ready for production!
+

@@ -1,0 +1,26 @@
+name: Lineage Artifact
+
+on:
+  pull_request:
+    paths:
+      - 'sql/**'
+      - 'scripts/lineage_capture.py'
+      - '.github/workflows/lineage.yml'
+
+jobs:
+  lineage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate lineage
+        run: |
+          python scripts/lineage_capture.py --out dist/lineage.json
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lineage
+          path: dist/lineage.json
+
